@@ -3,12 +3,8 @@ package com.app.mapsapp
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
-import android.os.Build
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.view.View
-import android.view.WindowInsets
-import android.view.WindowManager
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -26,7 +22,6 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
 
-
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener, OnRequestPermissionsResultCallback {
@@ -38,7 +33,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
-    @RequiresApi(Build.VERSION_CODES.R)
+    @RequiresApi(VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
@@ -111,10 +106,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
         ) {
-            showRationaleDialog(
-                "Required Permission",
-                "This Permission is required to show your precise location"
-            )
+            showRationaleDialog()
         } else {
             // 3. Otherwise, request permission
             ActivityCompat.requestPermissions(
@@ -142,10 +134,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     }
 
     @RequiresApi(VERSION_CODES.M)
-    private fun showRationaleDialog(title: String, message: String) {
+    private fun showRationaleDialog() {
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
-        builder.setTitle(title)
-            .setMessage(message)
+        builder.setTitle("Required Permission")
+            .setMessage("This Permission is required to show your precise location")
             .setPositiveButton("Ok") { _, _ ->
                 ActivityCompat.requestPermissions(
                     this,
