@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "425186870349",
+    "project_id": "randomplaces-466bb",
+    "storage_bucket": "randomplaces-466bb.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:425186870349:android:b57f77d3e2847526664804",
+        "android_client_info": {
+          "package_name": "com.adreal.randomplaces"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "425186870349-iaqvbtup1crudu4id9p5onmih76o7uqn.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.adreal.randomplaces",
+            "certificate_hash": "5825890339b9962c66ef69803a3f7c96fd65be6f"
+          }
+        },
+        {
+          "client_id": "425186870349-7in81pvej746f6s9atpijoonntk8odcc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAEr_bvQHmellXAWWk3Sge03sPM0YW7N9A"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "425186870349-7in81pvej746f6s9atpijoonntk8odcc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

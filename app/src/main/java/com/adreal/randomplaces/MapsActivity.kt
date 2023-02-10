@@ -1,10 +1,11 @@
-package com.app.mapsapp
+package com.adreal.randomplaces
 
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.os.CancellationSignal
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -13,14 +14,14 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
-import com.app.mapsapp.databinding.ActivityMapsBinding
-import com.google.android.gms.maps.CameraUpdateFactory
-import com.google.android.gms.maps.GoogleMap
-import com.google.android.gms.maps.OnMapReadyCallback
-import com.google.android.gms.maps.SupportMapFragment
+import com.adreal.randomplaces.databinding.ActivityMapsBinding
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+import com.google.android.gms.tasks.CancellationToken
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMyLocationButtonClickListener,
@@ -28,6 +29,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
     private lateinit var mMap: GoogleMap
     private lateinit var binding: ActivityMapsBinding
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -41,25 +43,25 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        val mapFragment = supportFragmentManager
-            .findFragmentById(R.id.map) as SupportMapFragment
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+
+        val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
     }
 
     @RequiresApi(VERSION_CODES.M)
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-
-        // Add a marker in bhubaneswar and move the camera
-        val bhubaneswar = LatLng(20.2961, 85.8245)
-        mMap.addMarker(MarkerOptions().position(bhubaneswar).title("Here"))?.isDraggable = true
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(bhubaneswar, 10f))
-        mMap.uiSettings.isZoomControlsEnabled = true
+        markCurrentLocation()
+        mMap.uiSettings.isZoomControlsEnabled = false
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isIndoorLevelPickerEnabled = true
-        mMap.setPadding(10,100,0,100)
+        mMap.setPadding(10, 100, 0, 100)
         enableMyLocation()
+
+        mMap.setOnMapClickListener {
+            mMap.addMarker(MarkerOptions().position(LatLng(it.latitude, it.longitude)))
+        }
     }
 
     override fun onMarkerClick(p0: Marker): Boolean {
@@ -149,5 +151,26 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 )
             }
         builder.create().show()
+    }
+
+    private fun markCurrentLocation() {
+        if (ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            fusedLocationClient.lastLocation
+                .addOnSuccessListener { location: Location? ->
+                    if (this::mMap.isInitialized) {
+                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(
+                            location?.latitude!!,
+                            location.longitude
+                        ), 15f))
+                    }
+                }
+        }
     }
 }

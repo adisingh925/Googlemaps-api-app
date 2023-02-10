@@ -1,4 +1,4 @@
-package com.app.mapsapp
+package com.adreal.randomplaces
 
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.ext.junit.runners.AndroidJUnit4

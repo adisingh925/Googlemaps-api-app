@@ -1,4 +1,4 @@
-package com.app.mapsapp
+package com.adreal.randomplaces
 
 import org.junit.Test
 
