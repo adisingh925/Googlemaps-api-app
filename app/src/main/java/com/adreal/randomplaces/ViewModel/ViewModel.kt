@@ -8,7 +8,6 @@ import com.adreal.randomplaces.SharedPreferences.SharedPreferences
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.QuerySnapshot
 import java.util.*
-import kotlin.collections.ArrayList
 
 class ViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -17,6 +16,7 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
     companion object{
         const val LOCATIONS = "locations"
         const val DOCUMENT = "doc"
+        const val SNAPSHOT = "snapshot"
     }
 
     private var db : FirebaseFirestore = FirebaseFirestore.getInstance()
@@ -41,10 +41,22 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     fun getAllData(){
         val docRef = db.collection(LOCATIONS)
-        docRef.get().addOnCompleteListener {
-            if(it.isSuccessful){
-                val document = it.result
-                locationData.postValue(document)
+        docRef.addSnapshotListener { snapshot, e ->
+            if (e != null) {
+                Log.w(SNAPSHOT, "Listen failed.", e)
+                return@addSnapshotListener
+            }
+
+            val source = if (snapshot != null && snapshot.metadata.hasPendingWrites())
+                "Local"
+            else
+                "Server"
+
+            if (snapshot != null && !snapshot.isEmpty) {
+                Log.d(SNAPSHOT, "$source data: $snapshot")
+                locationData.postValue(snapshot)
+            } else {
+                Log.d(SNAPSHOT, "$source data: null")
             }
         }
     }
