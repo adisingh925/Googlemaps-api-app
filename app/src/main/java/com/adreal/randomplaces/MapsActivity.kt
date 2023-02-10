@@ -5,7 +5,6 @@ import android.content.pm.PackageManager
 import android.location.Location
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.os.CancellationSignal
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -14,6 +13,9 @@ import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
 import androidx.core.view.*
+import androidx.lifecycle.ViewModelProvider
+import com.adreal.randomplaces.SharedPreferences.SharedPreferences
+import com.adreal.randomplaces.ViewModel.ViewModel
 import com.adreal.randomplaces.databinding.ActivityMapsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -21,15 +23,19 @@ import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import com.google.android.gms.tasks.CancellationToken
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMyLocationButtonClickListener,
     GoogleMap.OnMyLocationClickListener, OnRequestPermissionsResultCallback {
 
     private lateinit var mMap: GoogleMap
-    private lateinit var binding: ActivityMapsBinding
+    private val binding by lazy {
+        ActivityMapsBinding.inflate(layoutInflater)
+    }
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private val viewModel by lazy {
+        ViewModelProvider(this)[ViewModel::class.java]
+    }
 
     companion object {
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
@@ -38,15 +44,27 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
     @RequiresApi(VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        SharedPreferences.init(this)
         super.onCreate(savedInstanceState)
-
-        binding = ActivityMapsBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        viewModel.getAllData()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
-
         val mapFragment = supportFragmentManager.findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
+        viewModel.locationData.observe(this) {
+            for (location in it) {
+                mMap.addMarker(
+                    MarkerOptions().position(
+                        LatLng(
+                            location.get("latitude").toString().toDouble(),
+                            location.get("longitude").toString().toDouble()
+                        )
+                    )
+                )
+            }
+        }
     }
 
     @RequiresApi(VERSION_CODES.M)
@@ -61,6 +79,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
 
         mMap.setOnMapClickListener {
             mMap.addMarker(MarkerOptions().position(LatLng(it.latitude, it.longitude)))
+            viewModel.updateLocation(it)
         }
     }
 
@@ -165,10 +184,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
                     if (this::mMap.isInitialized) {
-                        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(LatLng(
-                            location?.latitude!!,
-                            location.longitude
-                        ), 15f))
+                        mMap.moveCamera(
+                            CameraUpdateFactory.newLatLngZoom(
+                                LatLng(
+                                    location?.latitude!!,
+                                    location.longitude
+                                ), 15f
+                            )
+                        )
                     }
                 }
         }
