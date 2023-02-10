@@ -3,12 +3,20 @@ package com.app.mapsapp
 import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import android.location.Location
+import android.os.Build
+import android.os.Build.VERSION_CODES
 import android.os.Bundle
+import android.view.View
+import android.view.WindowInsets
+import android.view.WindowManager
 import android.widget.Toast
+import androidx.annotation.RequiresApi
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.app.ActivityCompat.OnRequestPermissionsResultCallback
 import androidx.core.content.ContextCompat
+import androidx.core.view.*
 import com.app.mapsapp.databinding.ActivityMapsBinding
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
@@ -17,6 +25,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
+
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMyLocationButtonClickListener,
@@ -29,7 +38,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         private const val LOCATION_PERMISSION_REQUEST_CODE = 1
     }
 
+    @RequiresApi(Build.VERSION_CODES.R)
     override fun onCreate(savedInstanceState: Bundle?) {
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         super.onCreate(savedInstanceState)
 
         binding = ActivityMapsBinding.inflate(layoutInflater)
@@ -41,6 +52,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         mapFragment.getMapAsync(this)
     }
 
+    @RequiresApi(VERSION_CODES.M)
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
 
@@ -51,6 +63,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         mMap.uiSettings.isZoomControlsEnabled = true
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isIndoorLevelPickerEnabled = true
+        mMap.setPadding(10,100,0,100)
         enableMyLocation()
     }
 
@@ -72,6 +85,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         Toast.makeText(this, "Current Location", Toast.LENGTH_SHORT).show()
     }
 
+    @RequiresApi(VERSION_CODES.M)
     @SuppressLint("MissingPermission")
     private fun enableMyLocation() {
 
@@ -97,32 +111,51 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
                 android.Manifest.permission.ACCESS_COARSE_LOCATION
             )
         ) {
-//            PermissionUtils.RationaleDialog.newInstance(
-//                LOCATION_PERMISSION_REQUEST_CODE, true
-//            ).show(supportFragmentManager, "dialog")
-//            return
+            showRationaleDialog(
+                "Required Permission",
+                "This Permission is required to show your precise location"
+            )
+        } else {
+            // 3. Otherwise, request permission
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                ),
+                LOCATION_PERMISSION_REQUEST_CODE
+            )
         }
-
-        // 3. Otherwise, request permission
-        ActivityCompat.requestPermissions(
-            this,
-            arrayOf(
-                android.Manifest.permission.ACCESS_FINE_LOCATION,
-                android.Manifest.permission.ACCESS_COARSE_LOCATION
-            ),
-            LOCATION_PERMISSION_REQUEST_CODE
-        )
     }
 
+    @RequiresApi(VERSION_CODES.M)
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<out String>,
         grantResults: IntArray
     ) {
-        if(requestCode == LOCATION_PERMISSION_REQUEST_CODE){
+        if (requestCode == LOCATION_PERMISSION_REQUEST_CODE) {
             enableMyLocation()
         }
 
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    }
+
+    @RequiresApi(VERSION_CODES.M)
+    private fun showRationaleDialog(title: String, message: String) {
+        val builder: AlertDialog.Builder = AlertDialog.Builder(this)
+        builder.setTitle(title)
+            .setMessage(message)
+            .setPositiveButton("Ok") { _, _ ->
+                ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(
+                        android.Manifest.permission.ACCESS_FINE_LOCATION,
+                        android.Manifest.permission.ACCESS_COARSE_LOCATION
+                    ),
+                    LOCATION_PERMISSION_REQUEST_CODE
+                )
+            }
+        builder.create().show()
     }
 }
