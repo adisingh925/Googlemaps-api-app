@@ -183,12 +183,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         ) {
             fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if(location != null){
+                    if (location != null) {
                         if (this::mMap.isInitialized) {
                             mMap.moveCamera(
                                 CameraUpdateFactory.newLatLngZoom(
                                     LatLng(
-                                        location?.latitude!!,
+                                        location.latitude,
                                         location.longitude
                                     ), 15f
                                 )
