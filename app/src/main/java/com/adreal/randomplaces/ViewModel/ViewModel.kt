@@ -15,7 +15,6 @@ class ViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object{
         const val LOCATIONS = "locations"
-        const val DOCUMENT = "doc"
         const val SNAPSHOT = "snapshot"
     }
 

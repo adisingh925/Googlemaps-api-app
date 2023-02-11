@@ -5,11 +5,9 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
-import android.location.LocationListener
 import android.location.LocationManager
 import android.os.Build.VERSION_CODES
 import android.os.Bundle
-import android.util.Log
 import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AlertDialog
@@ -23,14 +21,11 @@ import com.adreal.randomplaces.SharedPreferences.SharedPreferences
 import com.adreal.randomplaces.ViewModel.ViewModel
 import com.adreal.randomplaces.databinding.ActivityMapsBinding
 import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationCallback
-import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.*
 import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.Marker
 import com.google.android.gms.maps.model.MarkerOptions
-import java.util.concurrent.TimeUnit
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarkerClickListener,
     GoogleMap.OnInfoWindowClickListener, GoogleMap.OnMyLocationButtonClickListener,
@@ -197,7 +192,9 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
             ) == PackageManager.PERMISSION_GRANTED
         ) {
             fusedLocationClient.lastLocation.addOnCompleteListener {
-                mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude,it.result.longitude), 15f))
+                if(it.result != null){
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(LatLng(it.result.latitude,it.result.longitude), 15f))
+                }
             }
         }
     }
