@@ -1,4 +1,4 @@
 <resources>
-    <string name="app_name">Mapsapp</string>
+    <string name="app_name">Random Places</string>
     <string name="title_activity_maps">MapsActivity</string>
 </resources>

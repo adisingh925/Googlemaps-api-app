@@ -78,7 +78,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback, GoogleMap.OnMarker
         mMap.uiSettings.isZoomControlsEnabled = false
         mMap.uiSettings.isCompassEnabled = true
         mMap.uiSettings.isIndoorLevelPickerEnabled = true
-        mMap.setPadding(10, 100, 0, 100)
+        mMap.setPadding(10, 80, 0, 100)
         enableMyLocation()
 
         mMap.setOnMapClickListener {
